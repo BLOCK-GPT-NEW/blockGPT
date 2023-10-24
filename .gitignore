@@ -1,6 +1,9 @@
-data/
-model/
-tmp/
+data/*
+!data/.gitkeep
+model/*
+!model/.gitkeep
+tmp/*
+!tmp/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
