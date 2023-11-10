@@ -1,9 +1,23 @@
 data/*
 !data/.gitkeep
+
+data_process/*
+!data_process/.gitkeep
+
+detection_result/*
+!detection_result/.gitkeep
+
+log/*
+!log/.gitkeep
+
 model/*
 !model/.gitkeep
+
 tmp/*
 !tmp/.gitkeep
+
+vocabulary/*
+!vocabulary/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
