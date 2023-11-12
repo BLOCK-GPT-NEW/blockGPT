@@ -45,7 +45,7 @@ def train_and_eval(file_i,data_i,vocabulary_file):
     # 初始化 Transformer 编码器模型
     hidden_size = 2056
     num_heads = 8
-    num_layers = 6
+    num_layers = 8
     d_model = 64
 
     device = torch.device('cuda')
@@ -56,7 +56,7 @@ def train_and_eval(file_i,data_i,vocabulary_file):
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(encoder_model.parameters(), lr=0.0001)
     # 创建一个学习率调度器，比如StepLR
-    #scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
     epochs = 5
 
     # 保存相关信息到日志中
@@ -113,7 +113,7 @@ def train_and_eval(file_i,data_i,vocabulary_file):
                     loss = loss_function(outputs, one_hot)
                     val_loss += loss.item()
 
-        
+        scheduler.step()
         print(f"Epoch {epoch+1}/{epochs} - Validation Loss: {val_loss/len(val_data_loader)}" + f"   train Loss: {train_loss/len(train_data_loader)}")
         print(f"第 {epoch+1}/{epochs} 轮完成")
 
