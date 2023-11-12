@@ -28,14 +28,14 @@ def train_and_eval(file_i,data_i,vocabulary_file):
         embedding_file_train.append(f"../tmp/embedding/tree_node_list{i}.pth")
 
     # 划分数据集、验证集
-    custom_train = CustomDataset(embedding_file_train,vocabulary)
-    # train_sequences, val_sequences = train_test_split(custom_data, test_size=0.1, random_state=42)
+    custom_data = CustomDataset(embedding_file_train,vocabulary)
+    custom_train, custom_val = train_test_split(custom_data, test_size=0.1, random_state=42)
 
     #创建数据加载器
     batch_size = 32
     num_workers = 0
     train_data_loader = DataLoader(custom_train, batch_size=batch_size, shuffle=True,pin_memory=True,num_workers=num_workers)
-    # val_data_loader = DataLoader(custom_val, batch_size=batch_size, shuffle=True,pin_memory=True,num_workers=num_workers)
+    val_data_loader = DataLoader(custom_val, batch_size=batch_size, shuffle=True,pin_memory=True,num_workers=num_workers)
 
     # ========================训练部分==========================
     # 使用预训练好的 embedding 初始化 nn.Embedding
@@ -78,15 +78,15 @@ def train_and_eval(file_i,data_i,vocabulary_file):
      
         src_mask = generate_square_subsequent_mask(256).to(device)
        
-        # 无监督与训练，不需要标签，不需要验证集
+        # 无监督训练
         for batch ,one_hot in train_data_loader:
          
             optimizer.zero_grad()
             batch, one_hot = batch.to(device), one_hot.to(device)
             batch = batch.transpose(0,1)
             outputs = encoder_model(batch,src_mask)
-
             outputs = outputs.transpose(0,1)
+
             loss = loss_function(outputs, one_hot)
             train_loss+=loss.item()
             loss.backward()
@@ -97,43 +97,24 @@ def train_and_eval(file_i,data_i,vocabulary_file):
 
             batch_i += 1
 
-        # for inputs, targets in train_data_loader:
-
-        #     optimizer.zero_grad()
-        #     inputs, targets = inputs.to(device), targets.to(device)
- 
-        #     outputs = encoder_model(inputs)
-
-        #     targets = torch.argmax(targets, dim=-1)
-    
-        #     loss = loss_function(outputs.permute(0, 2, 1), targets)
-        #     print(f'第{batch_i}轮训练')
-        #     print(loss.item())
-        #     train_loss+=loss.item()
-        #     loss.backward(retain_graph=True)
-            
-        #     optimizer.step()
-        #     scheduler.step()
-
-        #     batch_i += 1
-        """
         print('开始验证')
         # Validate此处要替换为验证集合
         encoder_model.eval()
         val_loss = 0
+        src_mask = generate_square_subsequent_mask(256).to(device)
         with torch.no_grad():
-            for inputs, targets in val_data_loader:
+            i= 0
+            for batch ,one_hot in val_data_loader:
+                    batch, one_hot = batch.to(device), one_hot.to(device)
+                    batch = batch.transpose(0,1)
+                    outputs = encoder_model(batch,src_mask)
 
-                inputs, targets = inputs.to(device), targets.to(device)
-                outputs = encoder_model(inputs)
-                targets = torch.argmax(targets, dim=-1)
-                loss = loss_function(outputs.permute(0, 2, 1), targets)
-                val_loss += loss.item()
-         """
+                    outputs = outputs.transpose(0,1)
+                    loss = loss_function(outputs, one_hot)
+                    val_loss += loss.item()
 
         
-        #print(f"Epoch {epoch+1}/{epochs} - Validation Loss: {val_loss/len(val_data_loader)}" + f"   train Loss: {train_loss/len(train_data_loader)}")
-        print(f"Epoch {epoch+1}/{epochs} - Train Loss: {train_loss/len(train_data_loader)}")
+        print(f"Epoch {epoch+1}/{epochs} - Validation Loss: {val_loss/len(val_data_loader)}" + f"   train Loss: {train_loss/len(train_data_loader)}")
         print(f"第 {epoch+1}/{epochs} 轮完成")
 
         # 保存相关信息
@@ -141,11 +122,10 @@ def train_and_eval(file_i,data_i,vocabulary_file):
         execution_time = end_time - start_time
         file_name = "../log/log0.txt"
         with open(file_name, "a") as file:
-                #file.write(f'epoch:{epoch+1}'+"    "+"time spend:"+str(execution_time )+'    '+'train Loss:'+f'{train_loss/len(train_data_loader)}'+'Validation Loss:'+ f'{val_loss/len(val_data_loader)}'+'\n')
-                file.write(f'epoch:{epoch+1}'+"    "+"time spend:"+str(execution_time )+'    '+'train Loss:'+f'{train_loss/len(train_data_loader)}'+'\n')
-    
+                file.write(f'epoch:{epoch+1}'+"    "+"time spend:"+str(execution_time )+'    '+'train Loss:'+f'{train_loss/len(train_data_loader)}'+'Validation Loss:'+ f'{val_loss/len(val_data_loader)}'+'\n')
+      
     # 保存模型
-    model_file = '../model/2w_new.pth'
+    model_file = '../model/test.pth'
     torch.save(encoder_model, model_file)
 
     # 保存相关信息

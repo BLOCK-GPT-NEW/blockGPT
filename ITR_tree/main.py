@@ -21,8 +21,8 @@ def main():
     client = MongoClient('mongodb://b515:sqwUiJGHYQTikv6z@10.12.46.33:27018/?authMechanism=DEFAULT')
     dbtest = client["geth"]
     collection = dbtest.get_collection("5m_10m_2w_output")
-    data = collection.find().limit(50)
-    data_onehot = collection.find().limit(50)
+    data = collection.find().limit(500)
+    data_onehot = collection.find().limit(500)
 
     # 处理交易时要用的一些标量
     tree_node_list = [] # 把node放入list中
@@ -177,7 +177,7 @@ def main():
             one_hot_list ={}
 
     # 将词汇表保存到文件
-    vocabulary_file = "../vocabulary/2w_new.pkl"
+    vocabulary_file = "../vocabulary/test.pkl"
     with open(vocabulary_file, "wb") as file:
         pickle.dump(vocabulary, file)
 
